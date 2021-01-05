@@ -1,26 +1,42 @@
 package service
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"log"
+	"reflect"
 )
 
-var b, _ = gtk.BuilderNew()
-var interfaceLogObject, _ = b.GetObject("interfaceLog")
-var interfaceLog, _ = interfaceLogObject.(*gtk.TextView)
+// Главный интерфейс
+type MainInterfaceStruct struct {
+	Login 		 *gtk.Entry
+	Password 	 *gtk.Entry
+	Auth 		 *gtk.Button
+	AddNewUrl 	 *gtk.Button
+	NameAddUrl 	 *gtk.Entry
+	Start 		 *gtk.Button
+	UrlList 	 *gtk.TextView
+	InterfaceLog *gtk.TextView
+}
+
+var MainInterface MainInterfaceStruct
+
 
 func DrawLayout() {
 	// Инициализируем GTK.
 	gtk.Init(nil)
+	builder, _ := gtk.BuilderNew()
 
 	// Загружаем в билдер окно из файла Glade
-	err := b.AddFromFile("./layout/layout.glade")
+	err := builder.AddFromFile("./layout/layout.glade")
 	if err != nil {
 		log.Fatal("Ошибка:", err)
 	}
 
 	// Получаем объект главного окна по ID
-	obj, err := b.GetObject("window_main")
+	obj, err := builder.GetObject("window_main")
 	if err != nil {
 		log.Fatal("Ошибка:", err)
 	}
@@ -33,44 +49,118 @@ func DrawLayout() {
 		gtk.MainQuit()
 	})
 
-	// Кнопка авторизации
-	obj, _ = b.GetObject("auth")
-	auth_button := obj.(*gtk.Button)
-	// Сигнал по нажатию на кнопку
-	auth_button.Connect("clicked", func() {
-		auth(auth_button)
-	})
-
-	interfaceLogObject, _ := b.GetObject("interfaceLog")
-	interfaceLog, _ := interfaceLogObject.(*gtk.TextView)
-
 	// Отображаем все виджеты в окне
 	win.ShowAll()
 
-	buffer, err := interfaceLog.GetBuffer()
-	buffer.SetText("Успешно запустили прогрумму")
-
-	// Выполняем главный цикл GTK (для отрисовки). Он остановится когда
-	// выполнится gtk.MainQuit()
-	gtk.Main()
+	initMainInterface(builder)
 }
 
-func auth(button *gtk.Button) {
-	// Поле логин
-	login_text, err1 := getValue("login")
-	// Поле паспорт
-	password_text, err2 := getValue("password")
-	if err1 == nil && err2 == nil{
-		if !Login(login_text, password_text) {
-			button.SetLabel("FAIL!")
-		} else {
-			button.SetLabel("OK!")
+func initMainInterface(builder *gtk.Builder) {
+	obj, err := builder.GetObject("Login")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Login"))
+	}
+	MainInterface.Login = obj.(*gtk.Entry)
+
+	obj, err = builder.GetObject("Password")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Password"))
+	}
+	MainInterface.Password = obj.(*gtk.Entry)
+
+	obj, err = builder.GetObject("Auth")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Auth"))
+	}
+	MainInterface.Auth = obj.(*gtk.Button)
+
+	obj, err = builder.GetObject("AddNewUrl")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "AddNewUrl"))
+	}
+	MainInterface.AddNewUrl = obj.(*gtk.Button)
+
+	obj, err = builder.GetObject("NameAddUrl")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "NameAddUrl"))
+	}
+	MainInterface.NameAddUrl = obj.(*gtk.Entry)
+
+	obj, err = builder.GetObject("Start")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Start"))
+	}
+	MainInterface.Start = obj.(*gtk.Button)
+
+	obj, err = builder.GetObject("UrlList")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "UrlList"))
+	}
+	MainInterface.UrlList = obj.(*gtk.TextView)
+
+	obj, err = builder.GetObject("InterfaceLog")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "InterfaceLog"))
+	}
+	MainInterface.InterfaceLog = obj.(*gtk.TextView)
+	
+	obj, err = builder.GetObject("Auth")
+	if err != nil {
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Auth"))
+	}
+	MainInterface.Auth = obj.(*gtk.Button)
+
+
+
+}
+func initMainInterface2(builder *gtk.Builder) {
+	list := make([]glib.IObject,  reflect.ValueOf(&MainInterface).Elem().NumField())
+
+	e := reflect.ValueOf(&MainInterface).Elem()
+	for i := 0; i < e.NumField(); i++ {
+		propertyName := e.Type().Field(i).Name
+		propertyType := e.Type().Field(i).Type.String()
+		value, err := builder.GetObject(propertyName)
+
+		if err != nil {
+			SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", propertyName))
+		}
+
+		switch propertyType {
+			case "*gtk.Entry":
+				list[i] = value.(*gtk.Entry)
+				break
+
+			case "*gtk.Button":
+				list[i] = value.(*gtk.Button)
+				break
+
+			case "*gtk.TextView":
+				list[i] = value.(*gtk.TextView)
+				break
+
+			default:
+				SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", propertyName))
 		}
 	}
+	data, _ := json.Marshal(list)
+	fmt.Println(data)
 }
 
-func getValue(fieldName string) (string, error) {
-	obj, _ := b.GetObject(fieldName)
+func SetLogForUser(text string) {
+	SetText(MainInterface.InterfaceLog, text)
+}
 
-	return obj.(*gtk.Entry).GetText()
+func SetText(property *gtk.TextView, text string) {
+
+	buffer, err := property.GetBuffer()
+
+	if err != nil {
+		fmt.Printf("Ошибка при указании нового значения %v\n", text)
+	}
+	start, end := buffer.GetBounds()
+	oldText, _ := buffer.GetText(start, end, true)
+
+
+	buffer.SetText(oldText + "\n" +  text + "\n")
 }

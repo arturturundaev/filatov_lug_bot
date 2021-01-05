@@ -12,7 +12,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkEntry" id="login">
+          <object class="GtkEntry" id="Login">
             <property name="width_request">200</property>
             <property name="height_request">34</property>
             <property name="visible">True</property>
@@ -25,7 +25,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="password">
+          <object class="GtkEntry" id="Password">
             <property name="width_request">220</property>
             <property name="height_request">34</property>
             <property name="visible">True</property>
@@ -38,7 +38,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="auth">
+          <object class="GtkButton" id="Auth">
             <property name="label" translatable="yes">button</property>
             <property name="width_request">75</property>
             <property name="height_request">34</property>
@@ -53,7 +53,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="addNewUrl">
+          <object class="GtkButton" id="AddNewUrl">
             <property name="label" translatable="yes">button</property>
             <property name="width_request">87</property>
             <property name="height_request">34</property>
@@ -68,7 +68,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="nameAddUrl">
+          <object class="GtkEntry" id="NameAddUrl">
             <property name="width_request">416</property>
             <property name="height_request">32</property>
             <property name="visible">True</property>
@@ -80,7 +80,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="start">
+          <object class="GtkButton" id="Start">
             <property name="label" translatable="yes">button</property>
             <property name="width_request">501</property>
             <property name="height_request">59</property>
@@ -94,7 +94,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView">
+          <object class="GtkTextView" id="UrlList">
             <property name="name">urlList</property>
             <property name="width_request">499</property>
             <property name="height_request">165</property>
@@ -107,7 +107,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView" id="interfaceLog">
+          <object class="GtkTextView" id="InterfaceLog">
             <property name="name">loggerInterface</property>
             <property name="width_request">500</property>
             <property name="height_request">251</property>
