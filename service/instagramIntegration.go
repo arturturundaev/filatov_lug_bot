@@ -14,7 +14,7 @@ type MyInstabot struct {
 	Insta *goinsta.Instagram
 }
 
-var instabot MyInstabot
+var Instabot MyInstabot
 
 // login will try to reload a previous session, and will create a new one if it can't
 func Login(login string, password string) bool {
@@ -23,7 +23,7 @@ func Login(login string, password string) bool {
 		return createAndSaveSession(login, password)
 	}
 
-	return false
+	return true
 }
 
 // reloadSession will attempt to recover a previous session
@@ -35,7 +35,7 @@ func reloadSession() error {
 	}
 
 	if insta != nil {
-		instabot.Insta = insta
+		Instabot.Insta = insta
 	}
 
 	log.Println("Successfully logged in")
@@ -54,13 +54,13 @@ func getInput(text string) string {
 // Logins and saves the session
 func createAndSaveSession(login string, password string) bool {
 	insta := goinsta.New(login, password)
-	instabot.Insta = insta
-	err := instabot.Insta.Login()
+	Instabot.Insta = insta
+	err := Instabot.Insta.Login()
 	if !check(err) {
 		return false
 	}
 
-	err = instabot.Insta.Export("./goinsta-session")
+	err = Instabot.Insta.Export("./goinsta-session")
 
 	if !check(err) {
 		return false

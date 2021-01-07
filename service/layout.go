@@ -152,15 +152,25 @@ func SetLogForUser(text string) {
 }
 
 func SetText(property *gtk.TextView, text string) {
-
 	buffer, err := property.GetBuffer()
 
-	if err != nil {
-		fmt.Printf("Ошибка при указании нового значения %v\n", text)
-	}
-	start, end := buffer.GetBounds()
-	oldText, _ := buffer.GetText(start, end, true)
+	oldText, err := GetText(property)
 
+	if err != nil {
+		oldText = ""
+	}
 
 	buffer.SetText(oldText + "\n" +  text + "\n")
 }
+
+func GetText(property *gtk.TextView) (string, error)  {
+	buffer, err := property.GetBuffer()
+
+	if err != nil {
+		fmt.Print("Ошибка при получении текущего значения")
+	}
+	start, end := buffer.GetBounds()
+
+	return buffer.GetText(start, end, true)
+}
+
