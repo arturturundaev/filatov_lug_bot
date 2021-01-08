@@ -6,6 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 	"log"
 	"strings"
+	goinsta "github.com/ahmdrz/goinsta/v2"
 )
 
 func main() {
@@ -44,6 +45,8 @@ func checkLoginAndPassword() bool {
 // Срабатывает после нажатия кнопки Старт
 func start() bool {
 	if checkLoginAndPassword() {
+		likeByPost("sdf")
+
 		listOfLinks, _ := service.GetText(service.MainInterface.UrlList)
 
 		arrayOfLinks := strings.Split(listOfLinks, "\n")
@@ -104,5 +107,18 @@ func likeByTag(tag string) {
 
 // Ставим лайки к посту и всем комментариям, в которым сожержатся указанные слова/фразы
 func likeByPost(linkToPost string)  {
-	post, _ := service.Instabot.Insta.Search.Location()
+	mediaId, err := goinsta.MediaIDFromShortID("CJv5sY4rG9T")
+	post, err := service.Instabot.Insta.GetMedia(mediaId)
+	if err != nil {
+		service.SetLogForUser(fmt.Sprintf("Не удалось найти пост по id %v", "CJx4ckfg9Ed"))
+	}
+	for _, item := range post.Items {
+		item.Comments.Sync()
+		item.Comments.Next()
+		comments := item.Comments.Items
+		for _, comment := range comments {
+			comment.
+		}
+	}
+	fmt.Print(post.Status)
 }
