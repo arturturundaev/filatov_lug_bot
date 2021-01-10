@@ -2,6 +2,7 @@ package service
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ahmdrz/goinsta/v2"
@@ -76,4 +77,32 @@ func check(err error) bool {
 	}
 
 	return true
+}
+
+
+type jsonResponseStruct struct {
+	media_id string
+}
+
+func GetFullMediaIdByShortId(mainUrl string)  {
+	links := []string{"https://api.instagram.com/oembed/?url=", mainUrl}
+	url := strings.Join(links,"")
+	data, err := Instabot.Insta.SendSimpleRequest(url)
+	if err == nil {
+		media := &jsonResponseStruct{}
+		err = json.Unmarshal(data, &media)
+	}
+
+	fmt.Println(data)
+
+
+	jsonResponse := jsonResponseStruct{}
+	jsonErr := json.Unmarshal(data, &jsonResponse)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	//return data
+	//jsonResponse := jsonResponseStruct{}
+	//jsonErr := json.Unmarshal(data, &jsonResponse)
 }

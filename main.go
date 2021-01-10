@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"example.com/service"
 	"fmt"
 	"github.com/gotk3/gotk3/gtk"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
-	goinsta "github.com/ahmdrz/goinsta/v2"
 )
 
 func main() {
@@ -45,7 +47,11 @@ func checkLoginAndPassword() bool {
 // Срабатывает после нажатия кнопки Старт
 func start() bool {
 	if checkLoginAndPassword() {
-		likeByPost("sdf")
+		//service.Instabot.Insta.GetToken()
+		likeByPost("https://www.instagram.com/p/CJvEmvwnqAn&") // 2481222174512160807 2481222174512160807_25207636427  OK
+		likeByPost("https://www.instagram.com/p/CJrX5AvHIyU") // 2480181092667919508  2480181092667919508_25207636427 FAIL
+		likeByPost("https://www.instagram.com/p/CJoocmgnZhW") // OK
+		likeByPost("https://www.instagram.com/p/CJk7swAi1SE") // FAIL
 
 		listOfLinks, _ := service.GetText(service.MainInterface.UrlList)
 
@@ -106,19 +112,90 @@ func likeByTag(tag string) {
 }
 
 // Ставим лайки к посту и всем комментариям, в которым сожержатся указанные слова/фразы
-func likeByPost(linkToPost string)  {
-	mediaId, err := goinsta.MediaIDFromShortID("CJv5sY4rG9T")
-	post, err := service.Instabot.Insta.GetMedia(mediaId)
+func likeByPost(linkToPost string) {
+	service.GetFullMediaIdByShortId(linkToPost)
+	post, err := service.Instabot.Insta.GetMedia(linkToPost)
 	if err != nil {
 		service.SetLogForUser(fmt.Sprintf("Не удалось найти пост по id %v", "CJx4ckfg9Ed"))
+
+		return
 	}
+
 	for _, item := range post.Items {
+		if !item.HasLiked {
+			err = item.Like()
+			if err != nil {
+				log.Printf("error on liking item %s, %v", item.ID, err)
+			} else {
+				log.Printf("Post %s liked", item.ID)
+			}
+		}
 		item.Comments.Sync()
 		item.Comments.Next()
 		comments := item.Comments.Items
+		NextComment:
 		for _, comment := range comments {
-			comment.
+			if comment.HasLikedComment {
+				continue NextComment
+			}
+			for _, whiteWord := range service.GetWhiteList() {
+				if strings.Contains(strings.ToLower(comment.Text), strings.ToLower(whiteWord)) {
+					comment.Like()
+					log.Printf("Comment '%v' liked", comment.Text)
+					continue NextComment
+				}
+			}
 		}
 	}
 	fmt.Print(post.Status)
+
+	return
+}
+
+
+
+type jsonResponseStruct struct {
+	media_id string
+}
+
+func getMediaId(mainUrl string) jsonResponseStruct {
+	links := []string{"https://api.instagram.com/oembed/?url=", mainUrl}
+	url := strings.Join(links,"")
+
+	resp, err := http.Get(url)
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	spaceClient := http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+
+	res, getErr := spaceClient.Do(req)
+	if getErr != nil {
+		log.Fatal(getErr)
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		log.Fatal(readErr)
+	}
+
+	jsonResponse := jsonResponseStruct{}
+	jsonErr := json.Unmarshal(body, &jsonResponse)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	return jsonResponse
+
 }

@@ -7,15 +7,14 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 	"log"
 	"reflect"
+	"strings"
 )
 
 // Главный интерфейс
 type MainInterfaceStruct struct {
 	Login 		 *gtk.Entry
 	Password 	 *gtk.Entry
-	Auth 		 *gtk.Button
-	AddNewUrl 	 *gtk.Button
-	NameAddUrl 	 *gtk.Entry
+	WhiteList 	 *gtk.Entry
 	Start 		 *gtk.Button
 	UrlList 	 *gtk.TextView
 	InterfaceLog *gtk.TextView
@@ -68,23 +67,11 @@ func initMainInterface(builder *gtk.Builder) {
 	}
 	MainInterface.Password = obj.(*gtk.Entry)
 
-	obj, err = builder.GetObject("Auth")
+	obj, err = builder.GetObject("WhiteList")
 	if err != nil {
-		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Auth"))
+		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "WhiteList"))
 	}
-	MainInterface.Auth = obj.(*gtk.Button)
-
-	obj, err = builder.GetObject("AddNewUrl")
-	if err != nil {
-		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "AddNewUrl"))
-	}
-	MainInterface.AddNewUrl = obj.(*gtk.Button)
-
-	obj, err = builder.GetObject("NameAddUrl")
-	if err != nil {
-		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "NameAddUrl"))
-	}
-	MainInterface.NameAddUrl = obj.(*gtk.Entry)
+	MainInterface.Password = obj.(*gtk.Entry)
 
 	obj, err = builder.GetObject("Start")
 	if err != nil {
@@ -103,12 +90,6 @@ func initMainInterface(builder *gtk.Builder) {
 		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "InterfaceLog"))
 	}
 	MainInterface.InterfaceLog = obj.(*gtk.TextView)
-	
-	obj, err = builder.GetObject("Auth")
-	if err != nil {
-		SetLogForUser(fmt.Sprintf("Ошибка при инициализации свойства %v\n", "Auth"))
-	}
-	MainInterface.Auth = obj.(*gtk.Button)
 
 
 
@@ -174,3 +155,12 @@ func GetText(property *gtk.TextView) (string, error)  {
 	return buffer.GetText(start, end, true)
 }
 
+func GetWhiteList() []string {
+	WhiteList, err := MainInterface.WhiteList.GetText()
+
+	if err == nil {
+		return []string{}
+	}
+
+	return strings.Split(WhiteList, ";")
+}
